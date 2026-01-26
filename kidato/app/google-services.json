@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "61996457649",
+    "project_id": "kidato-d4ce6",
+    "storage_bucket": "kidato-d4ce6.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:61996457649:android:0a02d03f458b29c7fe4c90",
+        "android_client_info": {
+          "package_name": "com.loki.kidato"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "61996457649-gr90dstkb2nikv5qepviaa8c58ngrl7p.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.loki.kidato",
+            "certificate_hash": "03f96d863ad99b1b2791701174d27b416c3ed8a3"
+          }
+        },
+        {
+          "client_id": "61996457649-fpov5vvip3vjtc6rlasvacnkp9rabkka.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAbXqsHG5iJUknt7Kt8fIj7kTzZn0CKal4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "61996457649-fpov5vvip3vjtc6rlasvacnkp9rabkka.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
