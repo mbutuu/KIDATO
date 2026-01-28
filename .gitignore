@@ -14,4 +14,8 @@
 .cxx
 local.properties
 google-services.json
-local.properties
+**/build/
+.gradle/
+.idea/caches/
+app/google-services.json
+
