@@ -22,7 +22,6 @@ fun ProfileSetupScreen(
         semesterKey: String,
         profileCompleted: Boolean
     ) -> Unit,
-    onSkip: () -> Unit
 ) {
     var name by remember { mutableStateOf("") }
     var regNo by remember { mutableStateOf("") }
@@ -193,12 +192,6 @@ fun ProfileSetupScreen(
 
         Spacer(Modifier.height(8.dp))
 
-        OutlinedButton(
-            modifier = Modifier.fillMaxWidth(),
-            onClick = onSkip
-        ) {
-            Text("Skip for now")
-        }
 
         if (!profileCompleted) {
             Spacer(Modifier.height(10.dp))

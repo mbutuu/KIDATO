@@ -70,19 +70,7 @@ class MainActivity : ComponentActivity() {
                                     profileCompleted = completed
                                 )
                             },
-                            onSkip = {
-                                // skipping means profile is NOT completed
-                                vm.saveProfileV2(
-                                    name = "",
-                                    regNo = "",
-                                    schoolId = "",
-                                    courseId = "",
-                                    year = 0,
-                                    semester = 0,
-                                    semesterKey = "",
-                                    profileCompleted = false
-                                )
-                            }
+
                         )
                     }
 
@@ -91,7 +79,8 @@ class MainActivity : ComponentActivity() {
                         if (showUpload) {
                             UploadFileScreen(
                                 vm = vm,
-                                onDone = { showUpload = false }
+                                onDone = { showUpload = false },
+                                onBack = { showUpload = false } // optional
                             )
                         } else {
                             HomeScreen(
@@ -101,8 +90,23 @@ class MainActivity : ComponentActivity() {
                             )
                         }
                     }
+
                 }
             }
         }
     }
+}
+
+private fun MainActivity.UploadFileScreen(vm: AuthViewModel, onDone: () -> Unit) {}
+
+private fun AuthViewModel.saveProfileV2(
+    name: String,
+    regNo: String,
+    schoolId: String,
+    courseId: String,
+    year: Int,
+    semester: Int,
+    semesterKey: String,
+    profileCompleted: Boolean
+) {
 }

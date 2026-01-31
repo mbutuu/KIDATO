@@ -12,15 +12,19 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.ui.platform.LocalContext
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import androidx.compose.ui.Alignment
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.compose.runtime.*
+import androidx.compose.ui.platform.LocalContext
+import com.google.android.gms.common.api.ApiException
+
 
 
 @Composable
-fun AuthScreen(vm: AuthViewModel, onAuthed: () -> Unit) {
-    val isAuthed by vm.authState.collectAsState()
-    val error by vm.error.collectAsState()
-
-    if (isAuthed) onAuthed()
-
+fun RegisterScreenSimple(
+    onRegister: (email: String, password: String) -> Unit,
+    onBackToLogin: () -> Unit
+) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
 
@@ -28,16 +32,19 @@ fun AuthScreen(vm: AuthViewModel, onAuthed: () -> Unit) {
         modifier = Modifier
             .fillMaxSize()
             .padding(20.dp),
-        verticalArrangement = Arrangement.Center
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text("Kidato", style = MaterialTheme.typography.headlineLarge)
+        Text("Create account", style = MaterialTheme.typography.headlineMedium)
+
         Spacer(Modifier.height(16.dp))
 
         OutlinedTextField(
             value = email,
             onValueChange = { email = it },
             label = { Text("Email") },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true
         )
 
         Spacer(Modifier.height(10.dp))
@@ -46,63 +53,104 @@ fun AuthScreen(vm: AuthViewModel, onAuthed: () -> Unit) {
             value = password,
             onValueChange = { password = it },
             label = { Text("Password") },
-            visualTransformation = PasswordVisualTransformation(),
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true
         )
 
-        Spacer(Modifier.height(14.dp))
+        Spacer(Modifier.height(16.dp))
 
         Button(
-            onClick = { vm.login(email, password) },
+            onClick = { onRegister(email.trim(), password) },
             modifier = Modifier.fillMaxWidth()
-        ) { Text("Login") }
+        ) {
+            Text("Register")
+        }
 
         Spacer(Modifier.height(8.dp))
 
-        OutlinedButton(
-            onClick = { vm.register(email, password) },
-            modifier = Modifier.fillMaxWidth()
-        ) { Text("Register") }
-
-        if (error != null) {
-            Spacer(Modifier.height(12.dp))
-            Text(error!!, color = MaterialTheme.colorScheme.error)
+        TextButton(onClick = onBackToLogin) {
+            Text("Back to login")
         }
-        val context = LocalContext.current
+    }
+}
 
-        val launcher = rememberLauncherForActivityResult(
-            contract = ActivityResultContracts.StartActivityForResult()
-        ) { result ->
-            if (result.resultCode == Activity.RESULT_OK) {
-                val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
-                val account = task.result
-                vm.signInWithGoogle(account.idToken!!)
+@Composable
+fun AuthScreen(
+    vm: AuthViewModel,
+    onAuthed: () -> Unit
+) {
+    val context = LocalContext.current
+    val activity = context as Activity
+
+    var isRegister by remember { mutableStateOf(false) }
+
+    // ---------------------------
+    // GOOGLE SIGN-IN SETUP
+    // ---------------------------
+    val gso = remember {
+        GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestIdToken(context.getString(R.string.default_web_client_id))
+            .requestEmail()
+            .build()
+    }
+
+    val googleClient = remember { GoogleSignIn.getClient(context, gso) }
+
+    val googleLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
+            try {
+                val account = task.getResult(ApiException::class.java)
+                val idToken = account.idToken
+                if (idToken != null) vm.signInWithGoogle(idToken)
+            } catch (e: ApiException) {
+                e.printStackTrace()
             }
         }
+    }
 
-        Spacer(Modifier.height(12.dp))
+    val isAuthed by vm.authState.collectAsState()
 
-        OutlinedButton(
-            onClick = {
-                val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                    .requestIdToken(context.getString(R.string.default_web_client_id))
-                    .requestEmail()
-                    .build()
+    LaunchedEffect(isAuthed) {
+        if (isAuthed) onAuthed()
+    }
 
-                val client = GoogleSignIn.getClient(context, gso)
-                launcher.launch(client.signInIntent)
+    // ---------------------------
+    // YOUR ORIGINAL SWITCH
+    // ---------------------------
+    if (!isRegister) {
+        // ✅ LOGIN SCREEN
+        LoginScreenFancy(
+            onLogin = { email, password ->
+                vm.login(email, password) // must exist
             },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Continue with Google")
-        }
-
-
-        Spacer(Modifier.height(20.dp))
-
-        Text(
-            "Google sign-in comes next (after we confirm email auth works).",
-            style = MaterialTheme.typography.bodySmall
+            onGoogle = {
+                googleLauncher.launch(googleClient.signInIntent)
+            },
+            onRegister = {
+                isRegister = true
+            },
+            onForgotPassword = {
+                // if you have resetPassword(email), call it here
+                // vm.resetPassword(email)
+            }
+        )
+    } else {
+        // ✅ YOUR EXISTING ELSE BLOCK (UNCHANGED)
+        RegisterScreenSimple(
+            onRegister = { email, password ->
+                vm.register(email, password)
+            },
+            onBackToLogin = {
+                isRegister = false
+            }
         )
     }
 }
+
+
+
+
+
